@@ -1,0 +1,9 @@
+separated
+checkpoint
+scp/backup
+.vscode
+__pycache__
+tbx
+test.png
+config.yaml
+scp

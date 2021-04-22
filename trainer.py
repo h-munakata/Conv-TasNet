@@ -14,11 +14,10 @@ class Trainer():
         self.model = model
         self.cur_epoch = 0
         self.name = config['name']
-        self.checkpoint = "./checkpoint"
-        self.time = time
         self.C = config['network']['C']
         self.config = config
-        os.makedirs("./checkpoint/" + self.name +"/"+time)
+        self.dir_save = os.path.join('./checkpoint',self.name,time)
+        os.makedirs(self.dir_save)
 
         # setting about optimizer
         opt_name = config['optim']['name']
@@ -87,8 +86,7 @@ class Trainer():
         val_loss = []
         print('cur_epoch',self.cur_epoch)
 
-        writer = tbx.SummaryWriter("tbx/" + self.time)
-        os.makedirs('./checkpoint/Conv_TasNet_config',exist_ok=True)
+        writer = tbx.SummaryWriter(self.dir_save)
         self.save_checkpoint(self.cur_epoch,best=False)
         v_loss = self.validation(valid_dataloader)
         best_loss = 1e10
@@ -122,10 +120,7 @@ class Trainer():
     def save_checkpoint(self, epoch, best=True):
         self.model.to('cpu')
         print('save model epoch:{0} as {1}'.format(epoch,"best" if best else "last"))
-        os.makedirs(os.path.join(self.checkpoint,self.name),exist_ok=True)
-
-        path_save_model = os.path.join(self.checkpoint,self.name,self.time,
-                                            '{0}.pt'.format('best' if best else 'last'))
+        path_save_model = os.path.join(self.dir_save,'{0}.pt'.format('best' if best else 'last'))
 
         torch.save({
             'epoch': epoch,
@@ -136,7 +131,7 @@ class Trainer():
 
         self.model.to(self.device)
 
-        with open(os.path.join(self.checkpoint,self.name,self.time,'config_backup.yaml'),mode='w') as f:
+        with open(os.path.join(self.dir_save,'config_backup.yaml'),mode='w') as f:
             f.write(yaml.dump(self.config))
 
 

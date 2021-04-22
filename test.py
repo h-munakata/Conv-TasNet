@@ -64,5 +64,5 @@ if __name__ == "__main__":
         config = yaml.safe_load(yml)
     
 
-    separation = Separation("checkpoint/Conv_TasNet_config/2021-04-21-05:55:44/best.pt")
+    separation = Separation("/home/h_munakata/Conv-TasNet/checkpoint/Conv_TasNet_config/2021-04-22-09:01:47/best.pt")
     separation.run()
