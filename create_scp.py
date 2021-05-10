@@ -1,4 +1,5 @@
 import sys
+import os
 
 def save_scp(dir_wav,scp_name):
     os.makedirs("./scp", exist_ok=True)
@@ -34,4 +35,4 @@ def wav2scp(dir_dataset,num_spks):
 
 if __name__ == "__main__":
     dir_dataset = sys.argv[1]
-    wav2scp(dir_dataset)
+    wav2scp(dir_dataset,2)

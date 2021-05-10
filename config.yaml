@@ -23,7 +23,7 @@ network:
   af: relu # use which activation function to generate mask (softmax, relu)
 
 dataloader:
-  batch_size: 18
+  batch_size: 9
   num_workers: 3
   shuffule: True
 

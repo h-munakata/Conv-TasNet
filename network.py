@@ -4,6 +4,7 @@ import torch.nn.functional as F
 import numpy as np
 from pytorch_model_summary import summary
 import os
+import matplotlib.pyplot as plt
 
 class ConvTasNet(nn.Module):
     def __init__(self, config):
@@ -39,7 +40,7 @@ class ConvTasNet(nn.Module):
         """
         mixture_w = self.encoder(mixture)
         est_mask = self.separation(mixture_w)
-        # X,Y,Z = mixture_w.shape
+        X,Y,Z = mixture_w.shape
         # est_mask = torch.ones(X*Y*Z*2).reshape([X,self.C,Y,Z])
         est_s = self.decoder(mixture_w, est_mask)
 

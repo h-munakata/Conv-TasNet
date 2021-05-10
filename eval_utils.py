@@ -40,7 +40,7 @@ def eval_ideal(s,mix_s,precision):
 def eval_SISDR(est_s,s,precision):
     _,C = s.shape
     permutations = list(itertools.permutations(range(C)))
-    min_loss = 1e10
+    min_loss = 1e50
     for p in permutations:
         permutation_est_eval = []
         for i in range(C):
