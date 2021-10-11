@@ -209,9 +209,9 @@ class Normalization(nn.Module):
     def __init__(self, channel_size, causal):
         super().__init__()
         if causal:
-            self.layernorm = GlobalLayerNormalization(channel_size)
-        else:
             self.layernorm = CumulativeLayerNormalization(channel_size)
+        else:
+            self.layernorm = GlobalLayerNormalization(channel_size)
     
     def forward(self, x):
         x = self.layernorm(x)
