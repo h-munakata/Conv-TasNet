@@ -1,9 +1,10 @@
 device:
   gpu: True
-  cuda: [0]
+  cuda: [0,1,2]
 
 seed: 46
 sampling_rate: 8000
+max_length: 10 # (second)
 
 HyperParams:
   C: 2
@@ -22,7 +23,7 @@ HyperParams:
 dataloader:
   batch_size: 3
   num_workers: 20
-  shuffule: true
+  shuffle: true
 
 optimizer:
   name: Adam

@@ -31,7 +31,7 @@ class Trainer():
             self.device_id = config["device"]["cuda"]
             self.device = torch.device(f"cuda:{self.device_id[0]}")
             if len(self.device_id)>1:
-                self.model = torch.nn.DataParallel(self.model, device_ids=device_id)
+                self.model = torch.nn.DataParallel(self.model, device_ids=self.device_id)
 
         self.model = self.model.to(self.device)
 

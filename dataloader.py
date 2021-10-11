@@ -7,7 +7,8 @@ import yaml
 
 
 class wav_dataset(Dataset):
-    def __init__(self,config,path_scp_mix,path_scp_targets):
+    def __init__(self, path_scp_mix, path_scp_targets, max_length=None):
+        self.max_length = max_length
 
         self.scp_mix = read_scp(path_scp_mix)
         self.scp_targets = [read_scp(path_scp_target_i) \
@@ -21,8 +22,8 @@ class wav_dataset(Dataset):
     def __getitem__(self, index):
         key = self.keys[index]
 
-        y_mix = read_wav(self.scp_mix[key])
-        y_targets = [read_wav(scp_target_i[key]) \
+        y_mix = read_wav(self.scp_mix[key], self.max_length)
+        y_targets = [read_wav(scp_target_i[key], self.max_length) \
                                 for scp_target_i in self.scp_targets]
         
         return y_mix,y_targets
@@ -40,22 +41,13 @@ def padding(batch):
 
     batch_s = pad_sequence(batch_s, batch_first=True)
 
-    if batch_s.shape[1]> 80000:
-        batch_s = batch_s[:,:80000,:]
-        batch_mix = batch_mix[:,:80000]
-
-
     return batch_mix, batch_s
 
 
 def make_dataloader(config, path_scp_mix, path_scp_targets):
-    batch_size = config['dataloader']['batch_size']
-    num_workers = config['dataloader']['num_workers']
-    shuffle = config['dataloader']['shuffule']
-    dataset  = wav_dataset(config, path_scp_mix, path_scp_targets)
+    dataset  = wav_dataset(path_scp_mix, path_scp_targets, config['max_length'])
 
-    dataloader = DataLoader(dataset,batch_size=batch_size,num_workers=num_workers,
-                                shuffle=shuffle,collate_fn=padding)
+    dataloader = DataLoader(dataset, **config['dataloader'], collate_fn=padding)
 
     return dataloader
 
@@ -73,8 +65,10 @@ def read_scp(scp_path):
     return scp_wav
 
 
-def read_wav(path_wav):
-    y,_ = sf.read(path_wav)
+def read_wav(path_wav, max_length=None):
+    y, sr = sf.read(path_wav)
+    if max_length!=None:
+        y = y[:int(sr*max_length)]
     return y
 
 def write_wav(path_wav, y, sr):
