@@ -16,8 +16,18 @@ class Separation():
         with open('./config.yaml', 'r') as yml:
             config = yaml.safe_load(yml)
         self.model = ConvTasNet(config)
+        self.path_model = path_model
+
         ckp = torch.load(path_model,map_location=torch.device('cpu'))
-        self.model.load_state_dict(ckp['model_state_dict'])
+
+        delete_keys = []
+        for key_layer in ckp['model_state_dict'].keys():
+            if key_layer.find("selector")!=-1:
+                delete_keys.append(key_layer)
+
+        for key_layer in delete_keys:
+            del ckp['model_state_dict'][key_layer]
+        self.model.load_state_dict(ckp['model_state_dict'],strict=False)
         dt_now = datetime.datetime.now()
         time = str(dt_now.strftime('%Y-%m-%d-%H:%M:%S'))
         self.dir_save = './separated/'+time
@@ -29,8 +39,8 @@ class Separation():
         with open(os.path.join(self.dir_save,'result.csv'), 'w') as f:
             writer = csv.writer(f)
             # est_value, base_value, ideal_value, improve_value, improve_ideal_value
-            header = ['SI-SDR_1','SI-SDR_2','Base SI-SDR_1','Base SI-SDR_2','IBM SI-SDR_1','IBM SI-SDR_2',
-                    'SI-SDRi_1','SI-SDRi_2','IBM SI-SDRi_1','IBM SI-SDRi_2']
+            header = ['key','SI-SDRi_1','SI-SDRi_2','SI-SDR_1','SI-SDR_2','Base SI-SDR_1','Base SI-SDR_2',
+                    'IBM SI-SDRi_1','IBM SI-SDRi_2','IBM SI-SDR_1','IBM SI-SDR_2',self.path_model]
             writer.writerow(header)
             for idx in range(len(self.eval_dataset)):
                 key = self.eval_dataset.keys[idx]
@@ -45,15 +55,15 @@ class Separation():
 
                 est_value, base_value, ideal_value, improve_value, improve_ideal_value = eval_each_s(est_s, s, mix_s)
 
-                result = est_value + base_value + ideal_value + improve_value + improve_ideal_value
+                result = [key]+ improve_value + est_value + base_value + improve_ideal_value + ideal_value 
                 list_eval.append(result)
                 print("idx:{}. key:{}, SI-SDRi:{}, SI-SDR:{}, Base SI-SDR{}".format(idx,key, improve_value, est_value, base_value))
 
-                if save_sound:
-                    for c in range(C):
-                        est_s_i = est_s[:,:,c].reshape(-1)
-                        path_wav = os.path.join(self.dir_save,filename.replace('.wav','_') + str(c+1) +'.wav')
-                        write_wav(path_wav,est_s_i,16000)
+                # if save_sound:
+                for c in range(C):
+                    est_s_i = est_s[:,:,c].reshape(-1)
+                    path_wav = os.path.join(self.dir_save,filename.replace('.wav','_') + str(c+1) +'.wav')
+                    write_wav(path_wav,est_s_i,16000)
 
                 writer.writerow(result)
 
@@ -68,7 +78,7 @@ if __name__ == "__main__":
         config = yaml.safe_load(yml)
 
     path_model = sys.argv[1]
-    if len(sys.argv>1):
+    if len(sys.argv)>2:
         save_sound = sys.argv[2]
     else:
         save_sound = False

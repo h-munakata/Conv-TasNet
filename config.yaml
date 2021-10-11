@@ -1,35 +1,40 @@
-name: Conv_TasNet_config
-gpu: cuda:0
-parallel: True
+device:
+  gpu: True
+  cuda: [0]
 
-training:
-  total_epoch: 200
-  early_stop: 10
-  resume:
-    state: False
-    path: ./checkpoint/Conv_TasNet_config/2021-04-14T00:23:17.830375/last.pt
+seed: 46
+sampling_rate: 8000
 
-network:
-  N: 128 # Number of filters in autoencoder
-  L: 40 # Length of the filters (in samples)
-  B: 128 # Number of channels in bottleneck and the residual paths’  1 × 1-conv block
-  Sc: 128 # Number of channels in skip-connection paths’ 1 × 1-conv blocks
-  H: 256 # Number of channels in convolutional blocks
-  P: 3 # Kernel size in convolutional blocks
-  X: 7 # Number of convolutional blocks in each repeat
-  R: 2 # Number of repeats
-  C: 2 # Number of speakers
-  causal: False # causal or non-causal (normalization type causal: gLN non-causal:cLN)
-  af: relu # use which activation function to generate mask (softmax, relu)
+HyperParams:
+  C: 2
+  N: 512
+  L: 16
+  B: 128
+  H: 512
+  Sc: 128
+  P: 3
+  X: 8
+  R: 3
+  encoder_activate: ReLU
+  mask_activate: sigmoid
+  causal: False
 
 dataloader:
-  batch_size: 9
-  num_workers: 3
-  shuffule: True
+  batch_size: 3
+  num_workers: 20
+  shuffule: true
 
-optim:
+optimizer:
   name: Adam
-  lr: 1.0e-3
-  momentum: 0.9
-  weight_decay: 0
-  clip_norm: 200
+  HyperParams:
+    lr: 1.0e-3
+    weight_decay: 0
+
+resume:
+  state: False
+  path: ./checkpoint/xxx/last.pt
+  load_optim: True
+
+stop:
+  early_stop: 10
+  max_epoch: 100

@@ -1,9 +1,5 @@
-separated
-checkpoint
-scp/backup
-.vscode
 __pycache__
-tbx
-test.png
-config.yaml
-scp
+.vscode
+checkpoint/*
+model/__pycache__
+scp/*
