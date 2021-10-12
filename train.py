@@ -87,9 +87,9 @@ class Trainer():
         while self.cur_epoch < self.max_epoch:
             self.cur_epoch += 1
             t_loss = self.train(self.cur_epoch, train_dataloader)
-            print(f'epoch{self.cur_epoch,}:train_loss{t_loss}')
+            print(f'epoch{self.cur_epoch}: train_loss = {t_loss}')
             v_loss = self.validation(valid_dataloader)
-            print(f'epoch{self.cur_epoch}:valid_loss{v_loss}')
+            print(f'epoch{self.cur_epoch}: valid_loss = {v_loss}')
 
             writer.add_scalar('t_loss', t_loss, self.cur_epoch)
             writer.add_scalar('v_loss', v_loss, self.cur_epoch)
@@ -170,6 +170,7 @@ if __name__ == "__main__":
     os.makedirs(dir_save, exist_ok=True)
 
     shutil.copyfile(args.path_config, dir_save / "config.yaml")
+    shutil.copytree("scp", dir_save / "scp")
 
     ctn = ConvTasNet(**config["HyperParams"])
 
