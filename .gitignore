@@ -3,3 +3,5 @@ __pycache__
 checkpoint/*
 model/__pycache__
 scp/*
+separated
+figure.png

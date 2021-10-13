@@ -21,7 +21,7 @@ HyperParams:
   causal: False
 
 dataloader:
-  batch_size: 3
+  batch_size: 6
   num_workers: 20
   shuffle: true
 
@@ -30,6 +30,8 @@ optimizer:
   HyperParams:
     lr: 1.0e-3
     weight_decay: 0
+  clipping_norm:
+    max_norm: 5
 
 resume:
   state: False

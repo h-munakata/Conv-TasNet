@@ -1,4 +1,6 @@
 import torch
+import itertools
+import numpy as np
 
 def SI_SDR(est_s, s):
     e_target = vec_inner(est_s,s)/vec_inner(s,s) * s 
@@ -6,8 +8,32 @@ def SI_SDR(est_s, s):
     si_sdr = 10*torch.log10(vec_inner(e_target, e_target) / vec_inner(e_res, e_res))
     return si_sdr
 
+
 def vec_inner(s1,s2):
     return torch.sum(s1*s2)
+
+
+def eval_SI_SDRi(est_s, s, x):
+    si_sdr = eval_SI_SDR(est_s, s)
+    C = s.shape[2]
+    x_repeat = torch.cat([x.unsqueeze(2) for _ in range(C)], dim=2)
+    base_si_sdr = permutation_solver(x_repeat, s, SI_SDR)
+
+    SI_SDRi = [si_sdr_c - base_si_sdr_c for si_sdr_c, base_si_sdr_c in zip(si_sdr, base_si_sdr)]
+
+    SI_SDRi = list(map(lambda x: np.round(x.item(), 2), SI_SDRi))
+    
+    return SI_SDRi
+
+
+def eval_SI_SDR(est_s, s):
+    si_sdr = permutation_solver(est_s, s, SI_SDR)
+    return si_sdr
+    
+
+def oracle_SI_SDRi(s, x):
+    pass
+
 
 
 # def IBM(S,C):
@@ -77,3 +103,23 @@ def vec_inner(s1,s2):
 #     improve_ideal_value = [np.round(ideal-base,precision) for ideal,base in zip(ideal_value,base_value)]
 
 #     return est_value, base_value, ideal_value, improve_value, improve_ideal_value
+
+
+
+def permutation_solver(est_s, s, metrics):
+    C = est_s.shape[2]
+    permutations = list(itertools.permutations(range(C)))
+    permutation_solved_loss = [-torch.tensor(float('inf'))]*C
+    max_value = - torch.tensor(float('inf'))
+
+    for p in permutations:
+        loss = []
+        for i in range(C):
+            loss.append(metrics(est_s[0,:,i], s[0,:,p[i]]))
+        if sum(loss) > max_value:
+            permutation_solved_loss = loss
+            max_value = sum(loss)
+
+    return permutation_solved_loss
+
+    

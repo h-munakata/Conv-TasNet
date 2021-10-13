@@ -51,6 +51,8 @@ class Trainer():
             epoch_loss = uPIT(est_s,s)
 
             epoch_loss.backward()
+            if "clipping_norm" in self.config["optimizer"]:
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), **self.config["optimizer"]["clipping_norm"])
             self.optimizer.step()
 
             total_loss += epoch_loss.detach()
