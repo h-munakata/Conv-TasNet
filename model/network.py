@@ -86,10 +86,9 @@ class Decoder(nn.Module):
     def forward(self, d):
         """
         Args:
-            w: [Batchsize, N, Timeframe]
-            est_mask: [Batchsize, C, N, Timeframe]
+            d: [Batchsize, N, Timeframe, C]
         Returns:
-            est_source: [Batchsize, C, T]
+            est_s: [Batchsize, Signallength, C]
         """
         s_hat = []
         for c in range(self.C):
@@ -119,7 +118,7 @@ class Separation(nn.Module):
         Args:
             w: [Batchsize, N, Timeframe]
         returns:
-            est_mask: [Batchsize, C, N, Timeframe]
+            est_mask: [Batchsize, N, Timeframe, C]
         """
         Batchsize, N, Timeframe = w.size()
 
@@ -232,8 +231,10 @@ class MaskActivation(nn.Module):
     
     def forward(self, x):
         Batchsize, _, Timeframe = x.shape
+        # [Batchsize, C*N, Timeframe] -> [Batchsize, C, N, Timeframe]
         x = x.view(Batchsize, self.C, self.N, Timeframe)
-        x = x.transpose(1,2).transpose(2,3)
+        # [Batchsize, C, N, Timeframe] -> [Batchsize, N, Timeframe, C]
+        x = x.permute(0,2,3,1)
         m = self.activation(x)
         return m
 
@@ -260,30 +261,6 @@ class CumulativeLayerNormalization(nn.Module):
         var = ((F - mean)**2).mean(dim=[1,2], keepdim=True)
         cLN_F = (F - mean) / (var + self.eps)**0.5 * self.gamma + self.beta
         return cLN_F
-
-
-# class GlobalLayerNormalization(nn.Module):
-#     def __init__(self, channel_size):
-#         super().__init__()
-#         self.gamma = nn.Parameter(torch.Tensor(1, channel_size, 1))  # [1, N, 1]
-#         self.beta = nn.Parameter(torch.Tensor(1, channel_size,1 ))  # [1, N, 1]
-#         self.eps = torch.finfo(torch.float32).eps
-
-#         # param initialization
-#         self.gamma.data.fill_(1)
-#         self.beta.data.zero_()
-
-#     def forward(self, F):
-#         """
-#         Args:
-#             F: [Batchsize, channel_size, Timeframe]
-#         Returns:
-#             cLN_F: [Batchsize, channel_size, Timeframe]
-#         """
-#         mean = F.mean(dim=[1,2], keepdim=True) #[Batchsize, 1, 1]
-#         var = ((F - mean)**2).mean(dim=[1,2], keepdim=True)
-#         gLN_F = (F - mean) / (var + self.eps)**0.5 * self.gamma + self.beta
-#         return gLN_F
 
 
 def padding_end(s_hat, x):
