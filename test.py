@@ -32,7 +32,6 @@ class Separation():
         self.eval_dataset  = wav_dataset("./scp/tt_mix.scp", ["./scp/tt_s1.scp","./scp/tt_s2.scp"])
 
     def run(self,save_sound=False):
-        list_eval = []
         with open(os.path.join(self.dir_save,'result.csv'), 'w') as f:
             writer = csv.writer(f)
             header = ['key']
@@ -55,8 +54,6 @@ class Separation():
 
                 result = [key]
                 result += si_sdri
-                list_eval.append(result)
-
                 print(f"idx:{idx}. key:{key}, SI-SDRi:{si_sdri}")
 
                 if save_sound:
