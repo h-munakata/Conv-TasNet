@@ -2,7 +2,7 @@ device:
   gpu: True
   cuda: [0,1,2]
 
-seed: 46
+seed: 3407
 sampling_rate: 8000
 max_length: 10 # (second)
 

@@ -15,6 +15,7 @@ class ConvTasNet(nn.Module):
         L:      Length of filters (in sample)
         B:      Number of channels in bottleneck and the residual path's 1x1-conv blocks
         H:      Number of channels in convolutional blocks
+                (Relates to the length of the sequence being considered. H*L is the length of sequence convoluted)
         Sc:     Number of channels in skip-connection path's 1x1-conv blocks
         P:      Kernel size in convolutional blocks
         X:      Number of convolutional blocks in each repeat
@@ -139,9 +140,8 @@ class TemporalConvNet(nn.Module):
         for r in range(R):
             for x in range(X):
                 dilation = 2**x
-                name = "Conv1D, repeat:{}, dilation:{}".format(r,dilation)
+                name = f"Conv1D, repeat:{r}, dilation:{dilation}"
                 self.network.add_module(name,Conv1DBlock(B, Sc, H, P,
-                                        stride=1,
                                         dilation=dilation,
                                         causal=causal))
 
@@ -152,7 +152,7 @@ class TemporalConvNet(nn.Module):
 
 
 class Conv1DBlock(nn.Module):
-    def __init__(self, B, Sc, H, P, stride, dilation, causal=False):
+    def __init__(self, B, Sc, H, P, dilation, causal=False):
         super().__init__()
 
         padding = (P - 1) * dilation 
@@ -168,8 +168,8 @@ class Conv1DBlock(nn.Module):
         self.network.add_module("1x1-conv", nn.Conv1d(B, H, 1, bias=False))
         self.network.add_module("PReLU", nn.PReLU())
         self.network.add_module("Normalization", Normalization(H, causal))
-        self.network.add_module("D-conv", nn.Conv1d(H, H, P,
-                                                    stride=stride, padding=padding,
+        self.network.add_module("D-conv", nn.Conv1d(H, H, kernel_size=P,
+                                                    stride=1, padding=padding,
                                                     dilation=dilation, groups=H,
                                                     bias=False))
         self.network.add_module("PReLU2", nn.PReLU())
